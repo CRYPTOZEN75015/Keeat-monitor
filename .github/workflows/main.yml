@@ -1,0 +1,27 @@
+name: Keeta Monitor
+
+on:
+  schedule:
+    - cron: "0 * * * *"   # checks every hour
+  workflow_dispatch:      # manual run
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out KeetaNetwork repos
+        uses: actions/checkout@v3
+        with:
+          repository: KeetaNetwork
+          fetch-depth: 1
+
+      - name: Search for banking keywords
+        run: |
+          echo "Scanning for keywords..."
+          KEYWORDS="swift|iban|sepa|ach|clabe|pix|bank|fiat|usd|rails|anchor"
+          
+          git grep -niE "$KEYWORDS" || echo "No matches found."
+
+          
+
