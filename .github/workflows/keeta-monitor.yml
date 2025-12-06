@@ -28,10 +28,18 @@ jobs:
             RESULT=$(curl -s -H "Authorization: token $GH_TOKEN" \
               "https://api.github.com/search/code?q=swift+OR+iban+OR+sepa+OR+ach+OR+clabe+OR+pix+OR+bank+OR+fiat+repo:KeetaNetwork/$repo")
 
-            if echo "$RESULT" | grep -q '"total_count": [1-9]'; then
-              echo "⚠️ Banking terms FOUND in $repo"
-            else
-              echo "No banking terms found in $repo"
-            fi
+          if echo "$RESULT" | grep -q '"total_count": [1-9]'; then
+  echo "⚠️ Banking terms FOUND in $repo"
+
+  # Create a GitHub issue for the match
+  curl -s -H "Authorization: token $GH_TOKEN" \
+       -H "Content-Type: application/json" \
+       -d "{\"title\": \"Banking keywords found in $repo\", \"body\": \"Potential banking keywords detected in $repo. Check scan logs for details.\"}" \
+       https://api.github.com/repos/${{ github.repository }}/issues
+
+else
+  echo "No banking terms found in $repo"
+fi
+
 
           done < repos.txt
