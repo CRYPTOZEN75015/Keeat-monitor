@@ -31,28 +31,26 @@ jobs:
               "https://api.github.com/search/code?q=swift+OR+iban+OR+sepa+OR+ach+OR+clabe+OR+pix+OR+anchor+OR+collateral+OR+tokenized+OR+stablecoin+OR+fiat-backed+repo:KeetaNetwork/$repo")
 
             if echo "$RESULT" | grep -q '"total_count": [1-9]'; then
-  echo "⚠️ Banking/payment terms FOUND in $repo"
+              echo "⚠️ Banking/payment terms FOUND in $repo"
 
-  # Check if an issue already exists for this repo
-  EXISTING=$(curl -s -H "Authorization: token $GH_TOKEN" \
-    "https://api.github.com/repos/$REPO_FULL_NAME/issues?state=open&labels=KeetaMonitor" \
-    | jq -r '.[] | select(.title | contains("'"$repo"'")) | .title')
+              # Check if an issue already exists for this repo
+              EXISTING=$(curl -s -H "Authorization: token $GH_TOKEN" \
+                "https://api.github.com/repos/$REPO_FULL_NAME/issues?state=open&labels=KeetaMonitor" \
+                | jq -r '.[] | select(.title | contains("'"$repo"'")) | .title')
 
-  if [ -z "$EXISTING" ]; then
-    echo "Creating new issue for $repo"
+              if [ -z "$EXISTING" ]; then
+                echo "Creating new issue for $repo"
 
-    curl -s -H "Authorization: token $GH_TOKEN" \
-         -H "Content-Type: application/json" \
-         -d '{"title": "Banking/payment keywords found in '"$repo"'", "body": "Potential banking/payment keywords detected in '"$repo"'. Check scan logs for details.", "labels": ["KeetaMonitor"]}' \
-         https://api.github.com/repos/$REPO_FULL_NAME/issues
-  else
-    echo "Issue already exists for $repo — skipping creation"
-  fi
+                curl -s -H "Authorization: token $GH_TOKEN" \
+                     -H "Content-Type: application/json" \
+                     -d '{"title": "Banking/payment keywords found in '"$repo"'", "body": "Potential banking/payment keywords detected in '"$repo"'. Check scan logs for details.", "labels": ["KeetaMonitor"]}' \
+                     https://api.github.com/repos/$REPO_FULL_NAME/issues
+              else
+                echo "Issue already exists for $repo — skipping creation"
+              fi
 
-else
-  echo "No banking/payment keywords found in $repo"
-fi
-
+            else
+              echo "No banking/payment keywords found in $repo"
+            fi
 
           done < repos.txt
-
